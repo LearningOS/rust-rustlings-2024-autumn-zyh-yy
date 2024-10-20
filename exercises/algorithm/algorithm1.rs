@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -69,14 +68,47 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+
+    fn pop_head(&mut self) -> Option<&T> {
+        if self.length > 0 {
+            return match self.start {
+                Some(x) => {
+                    self.start = unsafe{(*x.as_ptr()).next};
+                    self.length -= 1;
+                    Some(unsafe{ &(*x.as_ptr()).val})
+                },
+                None => None,
+            };
+        }
+        None
+    }
+}
+
+impl<T: std::cmp::PartialOrd + Copy> LinkedList<T> {
+    pub fn merge(mut list_a:LinkedList<T>, mut list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
+        let mut res = Self {
             length: 0,
             start: None,
             end: None,
+        };
+
+        while list_a.length > 0 || list_b.length > 0 {
+            let pa = list_a.get(0);
+            let pb = list_b.get(0);
+            if pa.is_some() && pb.is_some() {
+                if *pa.unwrap() <= *pb.unwrap() {
+                    res.add(*list_a.pop_head().unwrap());
+                } else {
+                    res.add(*list_b.pop_head().unwrap());
+                }
+            } else if pa.is_some() {
+                res.add(*list_a.pop_head().unwrap());
+            } else {
+                res.add(*list_b.pop_head().unwrap());
+            }
         }
+        res
 	}
 }
 
